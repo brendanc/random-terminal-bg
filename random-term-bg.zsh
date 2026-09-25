@@ -74,6 +74,12 @@ if [[ -o interactive ]]; then
     local entry=${palette[$((RANDOM % ${#palette[@]} + 1))]}
     local color=${entry%%:*}
     local name=${entry#*:}
+    __apply_term_bg "$color" "$name"
+  }
+  
+  __apply_term_bg() {
+    local color="$1"
+    local name="$2"
     # Pick a readable foreground from the background's perceived luminance:
     # dark text on light backgrounds, light text on dark ones.
     local r=$((16#${color:0:2})) g=$((16#${color:2:2})) b=$((16#${color:4:2}))
@@ -110,5 +116,77 @@ if [[ -o interactive ]]; then
     # Show which theme this window got.
     printf '🎨 %s\n' "$name"
   }
+  
+  color-test() {
+    # Display the current terminal's 16 ANSI color palette
+    echo "\n🎨 ANSI Color Palette for Current Theme:\n"
+    for i in {0..15}; do print -P "%F{$i}color $i%f"; done
+    echo ""
+  }
+  
+  cycle-theme() {
+    # Cycle to the next theme (optionally specify an index)
+    local palette=(
+      "2e1216:Oxblood"
+      "3a0d12:Wine"
+      "40161a:Brick"
+      "3a1e0d:Burnt Umber"
+      "2e1d0a:Molasses"
+      "3d2a12:Cognac"
+      "2c2a0e:Olive Night"
+      "33300f:Dark Chartreuse"
+      "0e2c14:Forest"
+      "0a3320:Emerald Depths"
+      "153a1a:Moss"
+      "0d2e22:Pine"
+      "0a2e2e:Deep Teal"
+      "0c3339:Petrol"
+      "07333a:Abyss Cyan"
+      "0d1f3d:Navy"
+      "112641:Deep Ocean"
+      "0a2447:Cobalt"
+      "011627:Night Owl"
+      "1c1442:Indigo"
+      "251650:Blackcurrant"
+      "1d1235:Midnight Violet"
+      "2c1240:Royal Purple"
+      "36104a:Aubergine"
+      "2e0f33:Plum"
+      "3a0f2c:Mulberry"
+      "40122e:Boysenberry"
+      "1c1c1c:Charcoal"
+      "0d1117:GitHub Dark"
+      "202230:Slate"
+      "f5f0e6:Parchment"
+      "faf3e0:Cream"
+      "f4ecd8:Linen"
+      "eae0cc:Sandstone"
+      "fce8e6:Blush"
+      "fdeede:Peach"
+      "f7f3d7:Buttermilk"
+      "e6f4e6:Mint Cream"
+      "def2f1:Seafoam"
+      "e3f0fb:Ice Blue"
+      "e8e6fb:Lavender Mist"
+      "f3e6fb:Wisteria"
+      "fbe6f3:Rose Quartz"
+      "eef1f5:Fog"
+      "f5f5f5:Snow"
+    )
+    
+    # Get current index from environment, default to random if not set
+    local current_idx=${TERM_BG_INDEX:-0}
+    local next_idx=$(( (current_idx + 1) % ${#palette[@]} ))
+    
+    local entry=${palette[$((next_idx + 1))]}
+    local color=${entry%%:*}
+    local name=${entry#*:}
+    
+    # Store the index for next cycle
+    export TERM_BG_INDEX=$next_idx
+    
+    __apply_term_bg "$color" "$name"
+  }
+  
   __random_term_bg
 fi
